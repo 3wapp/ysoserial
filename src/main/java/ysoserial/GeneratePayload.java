@@ -1,11 +1,7 @@
 package ysoserial;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import ysoserial.payloads.ObjectPayload;
 import ysoserial.payloads.ObjectPayload.Utils;
@@ -36,6 +32,7 @@ public class GeneratePayload {
 		try {
 			final ObjectPayload payload = payloadClass.newInstance();
 			final Object object = payload.getObject(command);
+
 			PrintStream out = System.out;
 			Serializer.serialize(object, out);
 			ObjectPayload.Utils.releasePayload(payload, object);
