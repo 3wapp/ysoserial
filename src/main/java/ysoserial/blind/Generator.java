@@ -30,6 +30,7 @@ public class Generator {
     private static final String FLD_CMD = "cmd";
     private static final String FLD_ARGS = "args";
 
+    private static final SecureRandom rand = new SecureRandom();
     private static final AtomicLong classCtr = new AtomicLong(1);
     private final ClassPool cp = ClassPool.getDefault();
     private final Map<String, Object> evaluators = new HashMap<>();
@@ -869,6 +870,15 @@ public class Generator {
             case "secProp": {
                 final String val = stmt.getString("val");
                 result = Commons1Gadgets.secMgrCheckPropertyAccessTransformer(val);
+                break;
+            }
+
+            case "lengthTest": {
+                // Test the length limit on the victim.
+                final long bytes = stmt.getLong("val");
+                StringBuilder sb = new StringBuilder();
+                for(long i = 0; i < bytes; i++) sb.append(String.valueOf((char)65 + rand.nextInt(26)));
+                result = new ConstantTransformer(sb.toString());
                 break;
             }
 

