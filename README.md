@@ -7,6 +7,15 @@ A proof-of-concept tool for generating payloads that exploit unsafe Java object 
 
 ![](https://github.com/frohoff/ysoserial/blob/master/ysoserial.png)
 
+## Blind extensions
+
+The project is extended to use CommonsCollections payloads in the restircted environments
+where RCE does not work. The blind approach is used as with SQLInjection.
+For more info read our blogpost:
+
+* ["Blind Java Deserialization Vulnerability - Commons Gadgets"](https://deadcode.me/blog/2016/09/02/Blind-Java-Deserialization-Commons-Gadgets.html)
+* ["Blind Java Deserialization - Part II - exploitation"](https://deadcode.me/blog/2016/09/18/Blind-Java-Deserialization-Part-II.html)
+
 ## Description
 
 Released as part of AppSecCali 2015 Talk ["Marshalling Pickles: how deserializing objects will ruin your day"](http://frohoff.github.io/appseccali-marshalling-pickles/) with gadget chains for Apache Commons Collections (3.x and 4.x), Spring Beans/Core (4.x), and Groovy (2.3.x). 
