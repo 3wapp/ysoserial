@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -23,9 +24,13 @@ public class AttackUtils {
      * @throws Exception
      */
     public static String httpGet(String urlToRead) throws Exception {
+        return httpGet(urlToRead, Proxy.NO_PROXY);
+    }
+
+    public static String httpGet(String urlToRead, Proxy proxy) throws Exception {
         StringBuilder result = new StringBuilder();
         URL url = new URL(urlToRead);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection(proxy);
         conn.setRequestMethod("GET");
         BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         String line;
@@ -44,9 +49,13 @@ public class AttackUtils {
      * @throws Exception
      */
     public static String httpPost(String urlToRead, String post) throws Exception {
+        return httpPost(urlToRead, post, Proxy.NO_PROXY);
+    }
+
+    public static String httpPost(String urlToRead, String post, Proxy proxy) throws Exception {
         StringBuilder result = new StringBuilder();
         URL url = new URL(urlToRead);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection(proxy);
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         final OutputStream os = conn.getOutputStream();
