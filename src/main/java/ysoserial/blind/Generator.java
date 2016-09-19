@@ -732,7 +732,7 @@ public class Generator {
                     execCmd = new String[] {"/bin/bash", "-c", stmt.getString("exec") + ";" + touchSnippet};
                 }
 
-                result = new Transformer[] {
+                final Merger<Transformer> trMerge = new Merger<>(
                         Commons1Gadgets.packToOne(
                                 single ?
                                         Commons1Gadgets.getExecTransformer((String)execCmd) :
@@ -749,8 +749,13 @@ public class Generator {
                                                 PredicateUtils.notPredicate(Commons1Gadgets.fileExistsPredicate(fname)),
                                                 ClosureUtils.asClosure(Commons1Gadgets.packToOne(Commons1Gadgets.getSleepTransformer(subsleep))),
                                                 false
-                                        ))),
-                    };
+                                        )))
+                );
+
+                // Delete the temporary file
+                trMerge.add(Commons1Gadgets.fileTransformer(fname));
+                trMerge.add(new InvokerTransformer("delete", null, null));
+                result = trMerge.toArray(Transformer.class);
                 break;}
 
             case "java":{
