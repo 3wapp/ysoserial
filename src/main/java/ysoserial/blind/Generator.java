@@ -775,6 +775,16 @@ public class Generator {
                 result = Commons1Gadgets.fileExistsPredicate(path);
                 break;}
 
+            case "fileDelete":{
+                final String path = stmt.getString("val");
+                result = Commons1Gadgets.mergeTrans(
+                        Commons1Gadgets.fileTransformer(path),
+                        new Transformer[]{
+                                new InvokerTransformer("delete",
+                                        null, null),
+                        });
+                break;}
+
             case "fileCanRead":{
                 final String path = stmt.getString("val");
                 result = Commons1Gadgets.mergeTrans(
