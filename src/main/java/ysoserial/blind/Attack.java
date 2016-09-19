@@ -384,12 +384,16 @@ public class Attack {
         log("Extracted string: %s", sb.toString());
     }
 
+    protected JSONObject payloadWithExec(Collection<JSONObject> objs){
+        return AttackTools.payloadWithExec(objs);
+    }
+
     protected boolean applyPayloadOnVictim(Collection<JSONObject> objs) throws Exception {
         return applyPayloadOnVictim(objs, true, null, null);
     }
 
     protected boolean applyPayloadOnVictim(Collection<JSONObject> objs, boolean randomize, Integer module, JSONObject aux) throws Exception {
-        final JSONObject pSpec2 = AttackTools.payloadWithExec(objs);
+        final JSONObject pSpec2 = payloadWithExec(objs);
         final List<RunResult> results2 = runPayloadAttempt(pSpec2);
         return wasVictimExcited(results2);
     }
