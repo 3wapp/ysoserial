@@ -152,6 +152,35 @@ public class GeneratorTest {
                 "}}}");
     }
 
+    @Test
+    public void testPayload16 () throws Exception {
+//        {exec: [
+//            {cmd:"bashc", val:"ping -n 4 google.com >> /tmp/googleping 2>> /tmp/googleping && sleep 3"}
+//        ]}
+        testPayload("{exec: [\n" +
+                "\t{cmd:\"bashc\", val:\"ping -c 4 google.com >> /tmp/googleping 2>> /tmp/googleping && sleep 3\"}\n" +
+                "]}");
+    }
+
+    @Test
+    public void testPayload17 () throws Exception {
+//         {exec: [
+//         {cmd:"execRuntime", val:["/bin/ping", "-n", "4", "google.com"]}
+//         ]}
+        testPayload("{exec: [\n" +
+                "\t{cmd:\"execRuntime\", val:[\"/sbin/ping\", \"-c\", \"4\", \"google.com\"]}\n" +
+                "]}");
+    }
+    
+    @Test
+    public void testPayload18 () throws Exception {
+//        {exec: [
+//            {cmd:"execWait", exec:"ping -n 4 google.com >> /tmp/googleping 2>> /tmp/googleping && sleep 3"}
+//        ]}
+        testPayload("{exec: [\n" +
+                "\t{cmd:\"execWait\", exec:\"ping -c 4 google.com >> /tmp/googleping 2>> /tmp/googleping && sleep 3\"}\n" +
+                "]}");
+    }
     public static String testPayload(String payloadSpec) throws Exception {
         String payloadBin = build(payloadSpec);
         String origPayload = payloadBin;

